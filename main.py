@@ -23,7 +23,7 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
-    print(f"✅ Logged in as {client.user} (ID: {client.user.id})")
+    print(f"Logged in as {client.user} (ID: {client.user.id})")
     print("Listening for messages in channel:", TARGET_CHANNEL_ID)
 
 @client.event
@@ -37,7 +37,7 @@ async def on_message(message):
         for attachment in message.attachments:
             if not attachment.content_type and not attachment.content_type.startswith("image/"):
                 return
-            print(f"📸 Processing image from {message.author}: {attachment.filename}")
+            print(f"Processing image from {message.author}: {attachment.filename}")
 
             # Download image
             image_bytes = await attachment.read()
