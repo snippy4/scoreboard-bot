@@ -10,19 +10,13 @@ class ValorantScoreboardParser:
     
     def preprocess_image(self):
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        # Denoise
         denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
-        # Increase contrast
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
         contrast = clahe.apply(denoised)
-        # Invert
         inverted = 255 - contrast
-        # Threshold
         _, thresh = cv2.threshold(inverted, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        # Erode slightly
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 1))
         eroded = cv2.erode(thresh, kernel, iterations=1)
-        # Scale up
         scaled = cv2.resize(eroded, None, fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
         return scaled
 
