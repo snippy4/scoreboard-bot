@@ -4,7 +4,7 @@ import re
 import discord
 from dotenv import load_dotenv
 from PIL import Image
-import pytesseract
+from scoreboard_to_data import ValorantScoreboardParser
 
 
 # Load your bot token from .env file
@@ -35,34 +35,16 @@ async def on_message(message):
 
     if message.attachments:
         for attachment in message.attachments:
-            if attachment.content_type and attachment.content_type.startswith("image/"):
-                print(f"📸 Processing image from {message.author}: {attachment.filename}")
+            if not attachment.content_type and not attachment.content_type.startswith("image/"):
+                return
+            print(f"📸 Processing image from {message.author}: {attachment.filename}")
 
-                # Download image
-                image_bytes = await attachment.read()
-                image = Image.open(io.BytesIO(image_bytes))
-
-                # OCR: extract text
-                text = pytesseract.image_to_string(image)
-                print("🔎 OCR result:\n", text)
-
-                # Try to parse player names and kills from text
-                # This regex looks for: name (word chars) then kills as number
-                pattern = r"([A-Za-z0-9_]+)\s+(\d+)\s*/\s*\d+\s*/\s*\d+"
-                players = re.findall(pattern, text)
-
-                if len(players) >= 2:
-                    top_player, bottom_player = players[0], players[1]
-                    top_name, top_kills = top_player[0], int(top_player[1])
-                    bottom_name, bottom_kills = bottom_player[0], int(bottom_player[1])
-
-                    print(f"👤 Top: {top_name} ({top_kills} kills)")
-                    print(f"👤 Bottom: {bottom_name} ({bottom_kills} kills)")
-
-                    if top_kills < bottom_kills:
-                        await message.channel.send(
-                            f"⚠️ Detected: **{top_name}** has fewer kills ({top_kills}) than **{bottom_name}** ({bottom_kills})!"
-                        )
-                else:
-                    print("❌ Could not parse player info from OCR text.")
+            # Download image
+            image_bytes = await attachment.read()
+            image = Image.open(io.BytesIO(image_bytes))
+            image.save('image.png')
+            scorebaording = ValorantScoreboardParser('image.png')
+            scoreboarded = scorebaording.find_scoreboarding()
+            print(scoreboarded)
+               
 client.run(TOKEN)

@@ -10,22 +10,38 @@ class ValorantScoreboardParser:
     
     def preprocess_image(self):
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        # Invert for light text on dark background
-        inverted = 255 - gray
-        # Apply threshold
+        # Denoise
+        denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
+        # Increase contrast
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        contrast = clahe.apply(denoised)
+        # Invert
+        inverted = 255 - contrast
+        # Threshold
         _, thresh = cv2.threshold(inverted, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        # Upscale for better OCR
-        scaled = cv2.resize(thresh, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+        # Erode slightly
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 1))
+        eroded = cv2.erode(thresh, kernel, iterations=1)
+        # Scale up
+        scaled = cv2.resize(eroded, None, fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
         return scaled
+
+
+
+
 
     def extract_text(self) -> str:
         processed = self.preprocess_image()
-        # Use PSM 6 for uniform block of text
+        cv2.imwrite('processed_image.png', processed)
         return pytesseract.image_to_string(processed, config='--psm 6')
 
     
     def parse_scoreboard(self) -> List[Dict[str, any]]:
         text = self.extract_text()
+        text = text.replace('é', '2').replace('É', '2')
+        text = text.replace('FA', '4').replace('Lb', '6')
+        text = text.replace('sé', '').replace('iy', '').replace('iv', '').replace('Roa', '')
+        text = re.sub(r'[^\w\s]', ' ', text)
         print(text)
         players = []
         
