@@ -10,18 +10,17 @@ from google import genai
 # Load your bot token from .env file
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-ALLOWED_NAMES = {'snippy' : '@snippy4', 
-'masochist' : '@alsilvs', 
-'sweetcorn' : '@zetabomb', 
-'switch' : '@t0mmy77', 
-'betajumper' : '@betajumper', 
-'gutz'  : '@angiegutz',
-'sadist' : '@mucchan9295', 
-'glitch' : '@glitch6164',
- 'ginger' : '@liviajt', 
- 'papi' : '@dchester', 
- 'aiyeo' : '@aiyeo', 
- 'aeo' : '@aiyeo'}
+ALLOWED_NAMES = {'snippy' : '345254471753924611', 
+'masochist' : '294868726313123870', 
+'sweetcorn' : '370258922868572172', 
+'switch' : '610223436522061853', 
+'betajumper' : '364856743441989633', 
+'gutz'  : '362310474798202881',
+'sadist' : '452533933452689439', 
+'glitch' : '754721639010140272',
+ 'ginger' : '406485851699281936', 
+ 'papi' : '77074956743086080', 
+ 'aiyeo' : '342433750409281536', }
 genaiclient = genai.Client()
 
 # Replace with the channel ID you want to read messages from
@@ -34,7 +33,7 @@ intents.message_content = True
 def generate_roast(scoreboarded_pairs):
     pairs_text = []
     for p1, p2 in scoreboarded_pairs:
-        pairs_text.append(f"<{ALLOWED_NAMES[p2['name'].lower()]}> ({p2['score']} score, {p2['kills']} kills) got scoreboarded in valorant by <{ALLOWED_NAMES[p1['name'].lower()]}> ({p1['score']} score, {p1['kills']} kills)")
+        pairs_text.append(f"<@{ALLOWED_NAMES[p2['name'].lower()]}> ({p2['score']} score, {p2['kills']} kills) got scoreboarded in valorant by <@{ALLOWED_NAMES[p1['name'].lower()]}> ({p1['score']} score, {p1['kills']} kills)")
     prompt = f"Write a quick, funny roast that isnt too long and isnt too short for {pairs_text}\
      this is a friendly inside joke so be as savage as you want, make your message informal, dont use too much punctuation, and use language you would expect a chronically online 18 year old to use.\
      feel free to use profanity, curse words, and insulting words that may be offensive as well as realistic text speak\
