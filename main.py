@@ -10,9 +10,18 @@ from google import genai
 # Load your bot token from .env file
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-ALLOWED_NAMES = {'snippy', 'masochist', 'sweetcorn', 
-'switch', 'betajumper', 'gutz', 'sadist', 'glitch',
- 'ginger', 'papi', 'aiyeo'}
+ALLOWED_NAMES = {'snippy' : '@snippy4', 
+'masochist' : '@alsilvs', 
+'sweetcorn' : '@zetabomb', 
+'switch' : '@t0mmy77', 
+'betajumper' : '@betajumper', 
+'gutz'  : '@angiegutz',
+'sadist' : '@mucchan9295', 
+'glitch' : '@glitch6164',
+ 'ginger' : '@liviajt', 
+ 'papi' : '@dchester', 
+ 'aiyeo' : '@aiyeo', 
+ 'aeo' : '@aiyeo'}
 genaiclient = genai.Client()
 
 # Replace with the channel ID you want to read messages from
@@ -22,9 +31,15 @@ TARGET_CHANNEL_ID = 1424379611692924998  # 👈 your channel ID as an integer
 intents = discord.Intents.default()
 intents.message_content = True
 
-def generate_roast(player_name, stats):
-    prompt = f"Write a short, funny roast for {player_name} who got acoreboarded in Valorant (high kills but low score). Their stats: {stats['score']} score, {stats['kills']} kills, {stats['deaths']} deaths, {stats['assists']} assists. this is a friendly inside joke so be as savage as you want"
-    response = genaiclient.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+def generate_roast(scoreboarded_pairs):
+    pairs_text = []
+    for p1, p2 in scoreboarded_pairs:
+        pairs_text.append(f"<{ALLOWED_NAMES[p2['name'].lower()]}> ({p2['score']} score, {p2['kills']} kills) got scoreboarded in valorant by <{ALLOWED_NAMES[p1['name'].lower()]}> ({p1['score']} score, {p1['kills']} kills)")
+    prompt = f"Write a quick, funny roast that isnt too long and isnt too short for {pairs_text}\
+     this is a friendly inside joke so be as savage as you want, make your message informal, dont use too much punctuation, and use language you would expect a chronically online 18 year old to use.\
+     feel free to use profanity, curse words, and insulting words that may be offensive as well as realistic text speak\
+     this prompt is for a bot to send a discord message so only write one message for the roast and include any players that got scoreboarded."
+    response = genaiclient.models.generate_content(model="gemini-2.0-flash", contents=prompt)
     return response.text
 
 # Create a client instance
@@ -62,7 +77,7 @@ async def on_message(message):
             if scoreboarded:
                 p1 = scoreboarded[0][0]
                 p2 = scoreboarded[0][1]
-                roast = generate_roast(p2['name'], p2)
+                roast = generate_roast(scoreboarded)
                 await message.channel.send(f"{roast}")
                 await message.add_reaction("<:snippy:1425117427301089400>")
                

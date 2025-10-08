@@ -1,62 +1,44 @@
-import cv2
-import pytesseract
-import re
+from google import genai
+from google.genai import types
 from typing import List, Dict
+from dotenv import load_dotenv
+import json
+import re
+import os
+
+load_dotenv()
 
 class ValorantScoreboardParser:
     def __init__(self, image_path: str):
         self.image_path = image_path
-        self.image = cv2.imread(image_path)
-    
-    def preprocess_image(self):
-        gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        contrast = clahe.apply(denoised)
-        inverted = 255 - contrast
-        _, thresh = cv2.threshold(inverted, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 1))
-        eroded = cv2.erode(thresh, kernel, iterations=1)
-        scaled = cv2.resize(eroded, None, fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
-        return scaled
-
-
-
-
-
-    def extract_text(self) -> str:
-        processed = self.preprocess_image()
-        cv2.imwrite('processed_image.png', processed)
-        return pytesseract.image_to_string(processed, config='--psm 6')
-
+        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
     
     def parse_scoreboard(self) -> List[Dict[str, any]]:
-        text = self.extract_text()
-        text = text.replace('é', '2').replace('É', '2')
-        text = text.replace('FA', '4').replace('Lb', '6')
-        text = text.replace('sé', '').replace('iy', '').replace('iv', '').replace('Roa', '')
-        text = re.sub(r'[^\w\s]', ' ', text)
-        print(text)
-        players = []
+        prompt = """Analyze this image. If it's a Valorant scoreboard, extract player data in JSON format: [{"name": "player", "score": 123, "kills": 12}]. 
+        Only include name, score (ACS), and kills for each player. If not a Valorant scoreboard, return empty array []."""
         
-        pattern = pattern = r'([A-Za-z0-9#_]+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)'
+        with open(self.image_path, 'rb') as f:
+            image_data = f.read()
+        
+        response = self.client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            contents=[
+                types.Part.from_bytes(data=image_data, mime_type="image/png"),
+                prompt
+            ]
+        )
+        
+        text = response.text
+        json_match = re.search(r'\[.*\]', text, re.DOTALL)
+        if json_match:
+            players = json.loads(json_match.group())
+            return players
+        return []
 
-        matches = re.findall(pattern, text)
-        
-        for match in matches:
-            player_data = {
-                'name': match[0],
-                'score': int(match[1]),
-                'kills': int(match[2]),
-                'deaths': int(match[3]),
-                'assists': int(match[4])
-            }
-            players.append(player_data)
-        
-        return players
     
     def find_scoreboarding(self) -> List[tuple]:
         players = self.parse_scoreboard()
+        print(players)
         mismatches = []
         
         for i in range(len(players)):
@@ -70,7 +52,7 @@ class ValorantScoreboardParser:
         return mismatches
 
 if __name__ == "__main__":
-    path = "processed_image.png"
+    path = "image.png"
     scoreboard = ValorantScoreboardParser(path)
     print(scoreboard.parse_scoreboard())
     print(scoreboard.find_scoreboarding())
