@@ -24,7 +24,7 @@ ALLOWED_NAMES = {'snippy' : '345254471753924611',
 genaiclient = genai.Client()
 
 # Replace with the channel ID you want to read messages from
-TARGET_CHANNEL_ID = 1424379611692924998  # 👈 your channel ID as an integer
+TARGET_CHANNEL_ID = 1065429100199686234  # 👈 your channel ID as an integer
 
 # Enable message content intent (required to read messages)
 intents = discord.Intents.default()
@@ -78,6 +78,6 @@ async def on_message(message):
                 p2 = scoreboarded[0][1]
                 roast = generate_roast(scoreboarded)
                 await message.channel.send(f"{roast}")
-                await message.add_reaction("<:snippy:1425117427301089400>")
+                await message.add_reaction("<:snippy:1208470366909890662>")
                
 client.run(TOKEN)
