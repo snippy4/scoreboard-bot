@@ -1,2 +1,4 @@
 .env
-processed_image.png
+*.png
+__pycache__/
+*.pyc
