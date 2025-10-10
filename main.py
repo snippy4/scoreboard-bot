@@ -25,6 +25,7 @@ genaiclient = genai.Client()
 
 # Replace with the channel ID you want to read messages from
 TARGET_CHANNEL_ID = 1065429100199686234  # 👈 your channel ID as an integer
+TEST_CHANNEL_ID = 1424379611692924998  # 👈 your channel ID as an integer
 
 # Enable message content intent (required to read messages)
 intents = discord.Intents.default()
@@ -53,6 +54,8 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
+    if message.channel.id == TEST_CHANNEL_ID:
+        await message.channel.send("scoreboard bot is running smoothly")
     if message.channel.id != TARGET_CHANNEL_ID:
         return
 
