@@ -26,7 +26,7 @@ genaiclient = genai.Client()
 # Replace with the channel ID you want to read messages from
 MOMENTS_CHANNEL_ID = 1065429100199686234  # 👈 your channel ID as an integer
 TEST_CHANNEL_ID = 1424379611692924998  # 👈 your channel ID as an integer
-SPAM_CHANNEL_ID = 1
+SPAM_CHANNEL_ID = 1194066107821195355
 # Enable message content intent (required to read messages)
 intents = discord.Intents.default()
 intents.message_content = True
