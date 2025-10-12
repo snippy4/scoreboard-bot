@@ -98,7 +98,8 @@ async def on_message(message):
     if message.channel.id == MOMENTS_CHANNEL_ID:
         await check_scoreboard(message)
     if message.channel.id == SPAM_CHANNEL_ID:
-        await check_wordle_fail(message)
+        if message.author.id == 1211781489931452447:
+            await check_wordle_fail(message)
     return
     
 
