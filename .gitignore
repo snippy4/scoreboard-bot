@@ -2,3 +2,5 @@
 *.png
 __pycache__/
 *.pyc
+image.png
+processed_image.png
