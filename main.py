@@ -31,7 +31,7 @@ SPAM_CHANNEL_ID = 1
 intents = discord.Intents.default()
 intents.message_content = True
 
-def generate_roast(scoreboarded_pairs):
+def generate_valorant_roast(scoreboarded_pairs):
     pairs_text = []
     for p1, p2 in scoreboarded_pairs:
         pairs_text.append(f"<@{ALLOWED_NAMES[p2['name'].lower()]}> ({p2['score']} score, {p2['kills']} kills) got scoreboarded in valorant by <@{ALLOWED_NAMES[p1['name'].lower()]}> ({p1['score']} score, {p1['kills']} kills)")
@@ -42,7 +42,14 @@ def generate_roast(scoreboarded_pairs):
     response = genaiclient.models.generate_content(model="gemini-2.0-flash", contents=prompt)
     return response.text
 
-def check_scoreboard(message):
+def generate_wordle_roast(people):
+    prompt = f"{people.split(' ')} failed the wordle yesterday, yikes. write a quick funny roast about how they failed the wordle.\
+    This is part of a friendly inside joke so feel free to be as mean as you like, you can use profanity and personal insults. you should also talk like a chronically online 18 year old using realistic text speak.\
+    this prompt is for a discord bot message reply so only reply with one message for the roast."
+    response = genaiclient.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+    return response.text
+
+async def check_scoreboard(message):
     if message.attachments:
         for attachment in message.attachments:
             if not attachment.content_type and not attachment.content_type.startswith("image/"):
@@ -63,14 +70,14 @@ def check_scoreboard(message):
             if scoreboarded:
                 p1 = scoreboarded[0][0]
                 p2 = scoreboarded[0][1]
-                roast = generate_roast(scoreboarded)
+                roast = generate_valorant_roast(scoreboarded)
                 await message.channel.send(f"{roast}")
                 await message.add_reaction("<:snippy:1208470366909890662>")
 
-def check_wordle_fail(message):
+async def check_wordle_fail(message):
     msg = message.content
-    if msg.contains("X/6:"):
-        await message.channel.send(msg.split("X/6:")[1])
+    if "X/6:" in msg:
+        await message.channel.send(generate_wordle_roast(msg.split("X/6:")[1]))
 
 
 # Create a client instance
@@ -79,7 +86,6 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user} (ID: {client.user.id})")
-    print("Listening for messages in channel:", TARGET_CHANNEL_ID)
 
 @client.event
 async def on_message(message):
@@ -87,12 +93,12 @@ async def on_message(message):
         return
     if message.channel.id == TEST_CHANNEL_ID:
         await message.channel.send("scoreboard bot is running smoothly")
-        check_scoreboard(message)
-        check_wordle_fail(message)
+        await check_scoreboard(message)
+        await check_wordle_fail(message)
     if message.channel.id == MOMENTS_CHANNEL_ID:
-        check_scoreboard(message)
+        await check_scoreboard(message)
     if message.channel.id == SPAM_CHANNEL_ID:
-        check_wordle_fail(message)
+        await check_wordle_fail(message)
     return
     
 
