@@ -24,9 +24,9 @@ ALLOWED_NAMES = {'snippy' : '345254471753924611',
 genaiclient = genai.Client()
 
 # Replace with the channel ID you want to read messages from
-TARGET_CHANNEL_ID = 1065429100199686234  # 👈 your channel ID as an integer
+MOMENTS_CHANNEL_ID = 1065429100199686234  # 👈 your channel ID as an integer
 TEST_CHANNEL_ID = 1424379611692924998  # 👈 your channel ID as an integer
-
+SPAM_CHANNEL_ID = 1
 # Enable message content intent (required to read messages)
 intents = discord.Intents.default()
 intents.message_content = True
@@ -42,23 +42,7 @@ def generate_roast(scoreboarded_pairs):
     response = genaiclient.models.generate_content(model="gemini-2.0-flash", contents=prompt)
     return response.text
 
-# Create a client instance
-client = discord.Client(intents=intents)
-
-@client.event
-async def on_ready():
-    print(f"Logged in as {client.user} (ID: {client.user.id})")
-    print("Listening for messages in channel:", TARGET_CHANNEL_ID)
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    if message.channel.id == TEST_CHANNEL_ID:
-        await message.channel.send("scoreboard bot is running smoothly")
-    if message.channel.id != TARGET_CHANNEL_ID:
-        return
-
+def check_scoreboard(message):
     if message.attachments:
         for attachment in message.attachments:
             if not attachment.content_type and not attachment.content_type.startswith("image/"):
@@ -82,5 +66,37 @@ async def on_message(message):
                 roast = generate_roast(scoreboarded)
                 await message.channel.send(f"{roast}")
                 await message.add_reaction("<:snippy:1208470366909890662>")
+
+def check_wordle_fail(message):
+    msg = message.content
+    if msg.contains("X/6:"):
+        await message.channel.send(msg.split("X/6:")[1])
+
+
+# Create a client instance
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_ready():
+    print(f"Logged in as {client.user} (ID: {client.user.id})")
+    print("Listening for messages in channel:", TARGET_CHANNEL_ID)
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    if message.channel.id == TEST_CHANNEL_ID:
+        await message.channel.send("scoreboard bot is running smoothly")
+        check_scoreboard(message)
+        check_wordle_fail(message)
+    if message.channel.id == MOMENTS_CHANNEL_ID:
+        check_scoreboard(message)
+    if message.channel.id == SPAM_CHANNEL_ID:
+        check_wordle_fail(message)
+    return
+    
+
+        
+
                
 client.run(TOKEN)
