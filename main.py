@@ -39,14 +39,14 @@ def generate_valorant_roast(scoreboarded_pairs):
      this is a friendly inside joke so be as savage as you want, make your message informal, dont use too much punctuation, and use language you would expect a chronically online 18 year old to use.\
      feel free to use profanity, curse words, and insulting words that may be offensive as well as realistic text speak\
      this prompt is for a bot to send a discord message so only write one message for the roast and include any players that got scoreboarded."
-    response = genaiclient.models.generate_content(model="gemma-3-1b", contents=prompt)
+    response = genaiclient.models.generate_content(model="gemini-2.5-flash-live", contents=prompt)
     return response.text
 
 def generate_wordle_roast(people):
     prompt = f"{people.split(' ')} failed the wordle yesterday, yikes. write a quick funny roast about how they failed the wordle.\
     This is part of a friendly inside joke so feel free to be as mean as you like, you can use profanity and personal insults. you should also talk like a chronically online 18 year old using realistic text speak.\
     this prompt is for a discord bot message reply so only reply with one message for the roast."
-    response = genaiclient.models.generate_content(model="gemma-3-1b", contents=prompt)
+    response = genaiclient.models.generate_content(model="gemini-2.5-flash-live", contents=prompt)
     return response.text
 
 async def check_scoreboard(message):
