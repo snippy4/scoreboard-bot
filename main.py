@@ -92,7 +92,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     if message.channel.id == TEST_CHANNEL_ID:
-        await message.channel.send("scoreboard bot is running smoothly")
+        await message.channel.send("scoreboard bot is running smoothly on v2")
         await check_scoreboard(message)
         await check_wordle_fail(message)
     if message.channel.id == MOMENTS_CHANNEL_ID:
