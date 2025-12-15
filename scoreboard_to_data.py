@@ -21,7 +21,7 @@ class ValorantScoreboardParser:
             image_data = f.read()
         
         response = self.client.models.generate_content(
-            model="gemini-2.5-flash-live",
+            model="gemma-3-1b",
             contents=[
                 types.Part.from_bytes(data=image_data, mime_type="image/png"),
                 prompt
