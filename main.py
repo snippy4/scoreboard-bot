@@ -1,6 +1,7 @@
 import os
 import io
 import re
+from datetime import date
 import discord
 from dotenv import load_dotenv
 from PIL import Image
@@ -22,6 +23,9 @@ ALLOWED_NAMES = {'snippy' : '345254471753924611',
  'papi' : '77074956743086080', 
  'aiyeo' : '342433750409281536', }
 genaiclient = genai.Client()
+DAILY_IMAGE_LIMIT = 150
+images_processed = 0
+images_processed_date = date.today()
 
 # Replace with the channel ID you want to read messages from
 MOMENTS_CHANNEL_ID = 1065429100199686234  # 👈 your channel ID as an integer
@@ -50,11 +54,19 @@ def generate_wordle_roast(people):
     return response.text
 
 async def check_scoreboard(message):
+    global images_processed, images_processed_date
+    if date.today() != images_processed_date:
+        images_processed = 0
+        images_processed_date = date.today()
     if message.attachments:
         for attachment in message.attachments:
+            if images_processed >= DAILY_IMAGE_LIMIT:
+                print("Daily image limit reached")
+                return
             if not attachment.content_type and not attachment.content_type.startswith("image/"):
                 return
             print(f"Processing image from {message.author}: {attachment.filename}")
+            images_processed += 1
 
             # Download image
             image_bytes = await attachment.read()
