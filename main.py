@@ -87,9 +87,10 @@ async def check_scoreboard(message):
                 await message.add_reaction("<:snippy:1208470366909890662>")
 
 async def check_wordle_fail(message):
-    msg = message.content
-    if "X/6:" in msg:
-        await message.channel.send(generate_wordle_roast(msg.split("X/6:")[1]))
+    pass
+    #msg = message.content
+    #if "X/6:" in msg:
+       # await message.channel.send(generate_wordle_roast(msg.split("X/6:")[1]))
 
 
 # Create a client instance
