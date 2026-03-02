@@ -18,9 +18,11 @@ jobs:
             cd ~/scoreboard-bot
             GOOD_COMMIT=$(cat .last_good_commit 2>/dev/null || git rev-parse HEAD)
 
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
+
             docker-compose down
-            docker-compose up -d --build
+            docker-compose up -d --build --no-cache
 
             # wait for bot to connect to discord gateway
             sleep 10
@@ -28,7 +30,7 @@ jobs:
             # run self-test: bot sends test messages and validates its own responses
             if ! docker-compose exec -T discord-bot python main.py --self-test; then
               echo "Smoke tests failed, rolling back to $GOOD_COMMIT"
-              git checkout $GOOD_COMMIT
+              git reset --hard $GOOD_COMMIT
               docker-compose down
               docker-compose up -d --build
               exit 1
