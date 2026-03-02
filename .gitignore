@@ -1,5 +1,6 @@
 .env
 *.png
+!testing/*.png
 __pycache__/
 *.pyc
 image.png
