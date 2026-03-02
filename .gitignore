@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 image.png
 processed_image.png
+chat

@@ -21,16 +21,16 @@ ALLOWED_NAMES = {'snippy' : '345254471753924611',
 'glitch' : '754721639010140272',
  'ginger' : '406485851699281936', 
  'papi' : '77074956743086080', 
- 'aiyeo' : '342433750409281536', }
+ 'aiyeo' : '342433750409281536',
+ 'twink destroyer' : '620302045773037569', }
 genaiclient = genai.Client()
 DAILY_IMAGE_LIMIT = 150
 images_processed = 0
 images_processed_date = date.today()
 
-# Replace with the channel ID you want to read messages from
-MOMENTS_CHANNEL_ID = 1065429100199686234  # 👈 your channel ID as an integer
-TEST_CHANNEL_ID = 1424379611692924998  # 👈 your channel ID as an integer
-SPAM_CHANNEL_ID = 1194066107821195355
+SCOREBOARD_CHANNELS = {1065429100199686234, 688450642498551815, 1424379611692924998}  # moments
+WORDLE_CHANNELS = {1194066107821195355}  # spam
+TEST_CHANNELS = {1424379611692924998}
 # Enable message content intent (required to read messages)
 intents = discord.Intents.default()
 intents.message_content = True
@@ -104,13 +104,13 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    if message.channel.id == TEST_CHANNEL_ID:
+    ch = message.channel.id
+    if ch in TEST_CHANNELS:
         await message.channel.send("scoreboard bot is running smoothly from new machine")
-        await check_scoreboard(message)
         await check_wordle_fail(message)
-    if message.channel.id == MOMENTS_CHANNEL_ID:
+    if ch in SCOREBOARD_CHANNELS:
         await check_scoreboard(message)
-    if message.channel.id == SPAM_CHANNEL_ID:
+    if ch in WORDLE_CHANNELS:
         if message.author.id == 1211781489931452447:
             await check_wordle_fail(message)
     return
