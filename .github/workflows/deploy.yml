@@ -22,8 +22,8 @@ jobs:
             git reset --hard origin/main
 
             docker-compose down
-            docker-compose build --no-cache
-            docker-compose up -d
+            docker rmi scoreboard-bot_discord-bot 2>/dev/null || true
+            docker-compose up -d --build
 
             # wait for bot to connect to discord gateway
             sleep 10
@@ -33,8 +33,8 @@ jobs:
               echo "Smoke tests failed, rolling back to $GOOD_COMMIT"
               git reset --hard $GOOD_COMMIT
               docker-compose down
-              docker-compose build
-              docker-compose up -d
+              docker rmi scoreboard-bot_discord-bot 2>/dev/null || true
+              docker-compose up -d --build
               exit 1
             fi
 
