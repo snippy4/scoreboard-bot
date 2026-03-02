@@ -149,8 +149,9 @@ async def on_message(message):
                 # let our own test images fall through to be processed
                 pass
             else:
-                # bot sent a text reply — count it as a scoreboard response
-                self_test_results["scoreboard_count"] = self_test_results.get("scoreboard_count", 0) + 1
+                # only count roast responses, not the "running smoothly" auto-reply
+                if "scoreboard bot is running smoothly" not in message.content:
+                    self_test_results["scoreboard_count"] = self_test_results.get("scoreboard_count", 0) + 1
                 return
         else:
             return
