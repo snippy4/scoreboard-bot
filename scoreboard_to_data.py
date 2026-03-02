@@ -31,8 +31,12 @@ class ValorantScoreboardParser:
         text = response.text
         json_match = re.search(r'\[.*\]', text, re.DOTALL)
         if json_match:
-            players = json.loads(json_match.group())
-            return players
+            try:
+                players = json.loads(json_match.group())
+                return players
+            except json.JSONDecodeError:
+                print(f"Failed to parse Gemini response: {text}")
+                return []
         return []
 
     
