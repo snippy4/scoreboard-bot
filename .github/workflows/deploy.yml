@@ -8,7 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to EC2
+      - name: Deploy and smoke test
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -16,6 +16,23 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/scoreboard-bot
+            GOOD_COMMIT=$(cat .last_good_commit 2>/dev/null || git rev-parse HEAD)
+
             git pull origin main
             docker-compose down
             docker-compose up -d --build
+
+            # wait for bot to connect to discord gateway
+            sleep 10
+
+            # run self-test: bot sends test messages and validates its own responses
+            if ! docker-compose exec -T discord-bot python main.py --self-test; then
+              echo "Smoke tests failed, rolling back to $GOOD_COMMIT"
+              git checkout $GOOD_COMMIT
+              docker-compose down
+              docker-compose up -d --build
+              exit 1
+            fi
+
+            git rev-parse HEAD > .last_good_commit
+            echo "Deploy successful"

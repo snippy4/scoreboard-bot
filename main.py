@@ -1,12 +1,16 @@
 import os
+import sys
 import io
 import re
+import asyncio
 from datetime import date
 import discord
 from dotenv import load_dotenv
 from PIL import Image
 from scoreboard_to_data import ValorantScoreboardParser
 from google import genai
+
+SELF_TEST = "--self-test" in sys.argv
 
 # Load your bot token from .env file
 load_dotenv()
@@ -99,10 +103,67 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user} (ID: {client.user.id})")
+    if SELF_TEST:
+        asyncio.create_task(run_self_test())
+
+
+import glob as globmod
+
+
+async def run_self_test():
+    await asyncio.sleep(2)
+    channel = client.get_channel(list(TEST_CHANNELS)[0])
+
+    # Test 1: send a ping message
+    print("TEST: sending ping...")
+    await channel.send("health check")
+
+    test_images = sorted(globmod.glob("testing/*.png"))
+    if not test_images:
+        print("FAIL: no test images found in testing/")
+        await client.close()
+        sys.exit(1)
+
+    # Test 2+: send each scoreboard image
+    for img in test_images:
+        name = os.path.basename(img)
+        print(f"TEST: sending {name}...")
+        self_test_results["pending_images"] = self_test_results.get("pending_images", 0) + 1
+        await channel.send(file=discord.File(img))
+
+    # Wait for bot to process all images
+    await asyncio.sleep(20)
+
+    if not self_test_results.get("ping"):
+        print("FAIL: bot did not respond to ping")
+        await client.close()
+        sys.exit(1)
+
+    expected = len(test_images)
+    got = self_test_results.get("scoreboard_count", 0)
+    if got < expected:
+        print(f"FAIL: bot responded to {got}/{expected} scoreboard images")
+        await client.close()
+        sys.exit(1)
+
+    print(f"All tests passed ({expected} images)")
+    await client.close()
+    sys.exit(0)
+
+
+self_test_results = {}
 
 @client.event
 async def on_message(message):
     if message.author == client.user:
+        if SELF_TEST and message.channel.id in TEST_CHANNELS:
+            # track that the bot responded (for self-test validation)
+            if message.attachments:
+                pass  # this is our own test image, ignore
+            elif "scoreboard bot is running smoothly" not in message.content:
+                self_test_results["scoreboard_count"] = self_test_results.get("scoreboard_count", 0) + 1
+            else:
+                self_test_results["ping"] = True
         return
     ch = message.channel.id
     if ch in TEST_CHANNELS:
