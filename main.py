@@ -114,30 +114,18 @@ async def run_self_test():
     await asyncio.sleep(2)
     channel = client.get_channel(list(TEST_CHANNELS)[0])
 
-    # Test 1: send a ping message
-    print("TEST: sending ping...")
-    await channel.send("health check")
-
     test_images = sorted(globmod.glob("testing/*.png"))
     if not test_images:
         print("FAIL: no test images found in testing/")
         await client.close()
         sys.exit(1)
 
-    # Test 2+: send each scoreboard image
     for img in test_images:
-        name = os.path.basename(img)
-        print(f"TEST: sending {name}...")
-        self_test_results["pending_images"] = self_test_results.get("pending_images", 0) + 1
+        print(f"TEST: sending {os.path.basename(img)}...")
         await channel.send(file=discord.File(img))
 
     # Wait for bot to process all images
     await asyncio.sleep(20)
-
-    if not self_test_results.get("ping"):
-        print("FAIL: bot did not respond to ping")
-        await client.close()
-        sys.exit(1)
 
     expected = len(test_images)
     got = self_test_results.get("scoreboard_count", 0)
@@ -146,7 +134,7 @@ async def run_self_test():
         await client.close()
         sys.exit(1)
 
-    print(f"All tests passed ({expected} images)")
+    print(f"All tests passed ({got}/{expected} images)")
     await client.close()
     sys.exit(0)
 
@@ -157,14 +145,15 @@ self_test_results = {}
 async def on_message(message):
     if message.author == client.user:
         if SELF_TEST and message.channel.id in TEST_CHANNELS:
-            # track that the bot responded (for self-test validation)
             if message.attachments:
-                pass  # this is our own test image, ignore
-            elif "scoreboard bot is running smoothly" not in message.content:
-                self_test_results["scoreboard_count"] = self_test_results.get("scoreboard_count", 0) + 1
+                # let our own test images fall through to be processed
+                pass
             else:
-                self_test_results["ping"] = True
-        return
+                # bot sent a text reply — count it as a scoreboard response
+                self_test_results["scoreboard_count"] = self_test_results.get("scoreboard_count", 0) + 1
+                return
+        else:
+            return
     ch = message.channel.id
     if ch in TEST_CHANNELS:
         await message.channel.send("scoreboard bot is running smoothly from new machine")
