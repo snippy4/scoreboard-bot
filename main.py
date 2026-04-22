@@ -42,7 +42,7 @@ intents.message_content = True
 
 import time
 
-def generate_valorant_roast(scoreboarded_pairs, retries=3):
+def generate_valorant_roast(scoreboarded_pairs, retries=4):
     pairs_text = []
     for p1, p2 in scoreboarded_pairs:
         pairs_text.append(f"<@{ALLOWED_NAMES[p2['name'].lower()]}> ({p2['score']} score, {p2['kills']} kills) got scoreboarded in valorant by <@{ALLOWED_NAMES[p1['name'].lower()]}> ({p1['score']} score, {p1['kills']} kills)")
@@ -56,7 +56,7 @@ def generate_valorant_roast(scoreboarded_pairs, retries=3):
             return response.text
         except Exception as e:
             if attempt < retries - 1:
-                wait = 2 ** attempt * 5
+                wait = 15 * (2 ** attempt)  # 15s, 30s, 60s
                 print(f"Gemini error ({e}), retrying in {wait}s ({attempt + 1}/{retries})")
                 time.sleep(wait)
             else:
@@ -136,8 +136,8 @@ async def run_self_test():
         print(f"TEST: sending {os.path.basename(img)}...")
         await channel.send(file=discord.File(img))
 
-    # Wait for bot to process all images
-    await asyncio.sleep(20)
+    # Wait for bot to process all images (longer to allow Gemini rate-limit retries)
+    await asyncio.sleep(120)
 
     expected = len(test_images)
     got = self_test_results.get("scoreboard_count", 0)
