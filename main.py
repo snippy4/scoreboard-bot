@@ -26,7 +26,8 @@ ALLOWED_NAMES = {'snippy' : '345254471753924611',
  'ginger' : '406485851699281936', 
  'papi' : '77074956743086080', 
  'aiyeo' : '342433750409281536',
- 'twink destroyer' : '620302045773037569', }
+ 'twink destroyer' : '620302045773037569', 
+ 'birdie' : '1474487059593826571', }
 genaiclient = genai.Client()
 DAILY_IMAGE_LIMIT = 150
 images_processed = 0
