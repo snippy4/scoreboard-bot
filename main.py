@@ -28,7 +28,7 @@ ALLOWED_NAMES = {'snippy' : '345254471753924611',
  'aiyeo' : '342433750409281536',
  'twink destroyer' : '620302045773037569', 
  'birdie' : '1474487059593826571', }
-genaiclient = genai.Client()
+genaiclient = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 DAILY_IMAGE_LIMIT = 150
 images_processed = 0
 images_processed_date = date.today()
