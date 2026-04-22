@@ -40,7 +40,9 @@ TEST_CHANNELS = {1424379611692924998}
 intents = discord.Intents.default()
 intents.message_content = True
 
-def generate_valorant_roast(scoreboarded_pairs):
+import time
+
+def generate_valorant_roast(scoreboarded_pairs, retries=3):
     pairs_text = []
     for p1, p2 in scoreboarded_pairs:
         pairs_text.append(f"<@{ALLOWED_NAMES[p2['name'].lower()]}> ({p2['score']} score, {p2['kills']} kills) got scoreboarded in valorant by <@{ALLOWED_NAMES[p1['name'].lower()]}> ({p1['score']} score, {p1['kills']} kills)")
@@ -48,8 +50,17 @@ def generate_valorant_roast(scoreboarded_pairs):
      this is a friendly inside joke so be as savage as you want, make your message informal, dont use too much punctuation, and use language you would expect a chronically online 18 year old to use.\
      feel free to use profanity, curse words, and insulting words that may be offensive as well as realistic text speak\
      this prompt is for a bot to send a discord message so only write one message for the roast and include any players that got scoreboarded."
-    response = genaiclient.models.generate_content(model="gemini-2.0-flash", contents=prompt)
-    return response.text
+    for attempt in range(retries):
+        try:
+            response = genaiclient.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+            return response.text
+        except Exception as e:
+            if attempt < retries - 1:
+                wait = 2 ** attempt * 5
+                print(f"Gemini error ({e}), retrying in {wait}s ({attempt + 1}/{retries})")
+                time.sleep(wait)
+            else:
+                raise
 
 def generate_wordle_roast(people):
     prompt = f"{people.split(' ')} failed the wordle yesterday, yikes. write a quick funny roast about how they failed the wordle.\
