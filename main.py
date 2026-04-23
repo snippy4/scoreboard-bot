@@ -52,7 +52,7 @@ def generate_valorant_roast(scoreboarded_pairs, retries=4):
      this prompt is for a bot to send a discord message so only write one message for the roast and include any players that got scoreboarded."
     for attempt in range(retries):
         try:
-            response = genaiclient.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+            response = genaiclient.models.generate_content(model="gemini-2.5-flash", contents=prompt)
             return response.text
         except Exception as e:
             if attempt < retries - 1:
